@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+        <link rel="stylesheet" href="{{ url_for('static', filename='lp5_style.css') }}">
+    </head>
+    <body>
+        <div id="input_form">
+            <form action = "/">
+                <select id="year1" name="year1" onchange="changeQB(1);"> 
+                    {% for i in range(2006, 2020) %}
+                        <option value="{{i}}">{{i}}</option>"
+                    {% endfor %}
+                </select>
+                <br>
+                <select id="qb1" name="qb1">
+                </select>
+                <br>
+                <select id="year2" name="year2" onchange="changeQB(2);"> 
+                    {% for i in range(2006, 2020) %}
+                        <option value="{{i}}">{{i}}</option>"
+                    {% endfor %}
+                </select>
+                <br>
+                <select id="qb2" name="qb2">
+                </select>
+                <br>
+                <input type="submit" value="submit">
+            </form>            
+            <script>
+                // https://stackoverflow.com/a/5448635
+                function transformToAssocArray( prmstr ) {
+                    var params = {};
+                    var prmarr = prmstr.split("&");
+                    for ( var i = 0; i < prmarr.length; i++) {
+                        var tmparr = prmarr[i].split("=");
+                        params[tmparr[0]] = tmparr[1];
+                    }
+                    return params;
+                }
+
+                function getSearchParameters() {
+                    var prmstr = window.location.search.substr(1);
+                    return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {};
+                }
+                
+                // gets called when year dropdown selection is changed
+                function changeQB(qbNum){
+                    var passers_by_year = {{passers_by_year|safe}};
+                    var selected_year = document.getElementById("year"+qbNum).value;
+                    var qbs = passers_by_year[selected_year];
+                    qbs.unshift("Average");
+                    var qbSel = document.getElementById("qb"+qbNum);
+                    qbSel.innerHTML="";
+                    for(var i = 0; i < qbs.length; i++){
+                        opt = document.createElement("option");
+                        opt.value = qbs[i];
+                        opt.text = qbs[i];
+                        qbSel.appendChild(opt);
+                    }
+                }
+
+                // if there are GET parameters, populate the dropdowns with the previously-input QBs & years
+                if(window.location.search.substr(1) != null && window.location.search.substr(1) != ""){
+                    var params = getSearchParameters(); 
+                    console.log("option 1");
+                    console.log(params["qb1"]);
+                    console.log(params["year1"]);
+                    console.log(params["qb2"]);
+                    console.log(params["year2"]);
+
+                    document.getElementById("year1").value = params["year1"];
+                    document.getElementById("year2").value = params["year2"];
+                    changeQB(1);
+                    changeQB(2);
+                    document.getElementById("qb1").value = params["qb1"];
+                    document.getElementById("qb2").value = params["qb2"];
+                }
+                // otherwise, just set them to their "zero" values
+                else{
+                    console.log("option 2");
+                    changeQB(1);
+                    changeQB(2);
+                }
+            </script> 
+        </div>
+        <div id="graph">
+        {% if has_fig %}
+            <h2>{{qb1_str}} vs {{qb2_str}}</h2>
+            <img src="data:image/png;base64,{{ fig }}">
+        {% endif %}
+        </div>
+    </body>
+</html>
